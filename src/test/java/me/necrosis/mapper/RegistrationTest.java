@@ -16,7 +16,11 @@ public class RegistrationTest {
     public RegistrationTest(){
         this.mapper = new ModelMapper();
         try {
-            registerMappers(mapper, "me.necrosis.mapper.mappers", "me.necrosis.mapper.converters");
+            registerMappers(
+                    mapper,
+                    "me.necrosis.mapper.mappers",
+                    "me.necrosis.mapper.converters"
+            );
         }catch (Exception  e){
             e.printStackTrace();
         }
@@ -32,6 +36,7 @@ public class RegistrationTest {
     public void isMapperWorking(){
         PersonCreateDTO dto = new PersonCreateDTO("alex","necrosis@gmail.com");
         Person person = this.mapper.map(dto, Person.class);
+        Assertions.assertEquals("alex",person.getName());
         Assertions.assertEquals("ALEX",person.getUsername());
         Assertions.assertNotNull(person.getUuid());
     }

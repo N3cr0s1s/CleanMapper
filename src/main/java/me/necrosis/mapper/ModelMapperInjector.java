@@ -1,11 +1,13 @@
 package me.necrosis.mapper;
 
+import me.necrosis.mapper.annotations.GlobalConverter;
+import me.necrosis.mapper.components.CleanMap;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 import org.reflections.Reflections;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +22,11 @@ public class ModelMapperInjector {
             Map<Class<? extends AbstractConverter>, AbstractConverter> converterMap = new HashMap<>();
             for (Class<? extends AbstractConverter> converterClass : converters) {
                 AbstractConverter converter = converterClass.getDeclaredConstructor().newInstance();
-                mapper.addConverter(converter);
+
+                if (converterClass.isAnnotationPresent(GlobalConverter.class)){
+                    mapper.addConverter(converter);
+                }
+
                 converterMap.put(converter.getClass(), converter);
             }
 
@@ -39,14 +45,14 @@ public class ModelMapperInjector {
         try {
             Map<Class<? extends AbstractConverter>, AbstractConverter> converterMap = registerConverter(mapper, pathToConverters);
             Reflections reflections = new Reflections(pathToClasses);
-            Set<Class<? extends PropertyMap>> mappers = reflections.getSubTypesOf(PropertyMap.class);
-            for (Class<? extends PropertyMap> mapperClass : mappers) {
-                PropertyMap mapperInstance;
-                try {
-                    mapperInstance = mapperClass.getDeclaredConstructor(java.util.Map.class).newInstance(converterMap);
-                } catch (NoSuchMethodException ignored) {
-                    mapperInstance = mapperClass.getDeclaredConstructor().newInstance();
-                }
+            Set<Class<? extends CleanMap>> mappers = reflections.getSubTypesOf(CleanMap.class);
+            for (Class<? extends CleanMap> mapperClass : mappers) {
+                CleanMap mapperInstance = mapperClass.getDeclaredConstructor().newInstance();
+
+                Method method = mapperClass.getSuperclass().getDeclaredMethod("setConverters", Map.class);
+                method.setAccessible(true);
+                method.invoke(mapperInstance,converterMap);
+
                 mapper.addMappings(mapperInstance);
             }
         } catch (Exception e) {

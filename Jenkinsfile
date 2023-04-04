@@ -1,5 +1,5 @@
 def nexusCredentialsId = 'nexus-password'
-def nexusRepositoryUrl = 'https://nexus.partybeast.org/repository/maven-releases/me/necrosis/mapper/CleanMapper/0.1.0/CleanMapper-0.1.0.jar'
+def nexusRepositoryUrl = 'https://nexus.partybeast.org/repository/maven-releases/me/necrosis/mapper/CleanMapper/0.1.1/CleanMapper-0.1.1.jar'
 
 pipeline {
   agent any
@@ -36,7 +36,7 @@ pipeline {
     stage('Upload to Nexus') {
         steps {
             withCredentials([usernamePassword(credentialsId: nexusCredentialsId, passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
-                sh "curl -v -u ${env.NEXUS_USERNAME}:${env.NEXUS_PASSWORD} --upload-file target/CleanMapper-1.0.jar ${nexusRepositoryUrl}"
+                sh "curl -v -u ${env.NEXUS_USERNAME}:${env.NEXUS_PASSWORD} --upload-file target/CleanMapper-0.1.1.jar ${nexusRepositoryUrl}"
             }
         }
     }
